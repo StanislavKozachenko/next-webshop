@@ -103,8 +103,8 @@ model CartItem {
   productItem   ProductItem @relation(fields: [productItemId], references: [id])
   productItemId Int
 
-  cart   Cart @relation(fields: [cardId], references: [id])
-  cardId Int
+  cart   Cart @relation(fields: [cartId], references: [id])
+  cartId Int
 
   quantity Int
 
