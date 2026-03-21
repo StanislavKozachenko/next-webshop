@@ -1,6 +1,6 @@
-
 import {hashSync} from 'bcrypt'
 import {categories, ingredients, products} from "@/prisma/constants";
+import {Prisma} from "@prisma/client";
 import {prisma} from "@/prisma/prisma-client";
 
 async function up() {
@@ -70,6 +70,51 @@ async function up() {
             },
         },
     });
+
+    const price = () => Math.floor(Math.random() * (600 - 190) + 190);
+
+    const pizzaConfigs = [
+        {id: pizza1.id, variants: [[1, 20], [2, 30], [2, 40]]},
+        {id: pizza2.id, variants: [[1, 20], [1, 30], [1, 40], [2, 20], [2, 30], [2, 40]]},
+        {id: pizza3.id, variants: [[1, 20], [2, 30], [2, 40]]},
+    ];
+
+    const data: Prisma.ProductItemUncheckedCreateInput[] = [
+        ...pizzaConfigs.flatMap(({id, variants}) =>
+            variants.map(([pizzaType, size]) => ({productId: id, pizzaType, size, price: price()}))
+        ),
+
+        ...Array.from({length: 17}, (_, i) => ({productId: i + 1, price: price()}))
+    ];
+
+    await prisma.productItem.createMany({data});
+
+    await prisma.cart.createMany({
+        data: [
+            {
+                userId: 1,
+                totalAmount: 0,
+                token: '11111',
+            },
+            {
+                userId: 2,
+                totalAmount: 0,
+                token: '22222',
+            }
+        ]
+    });
+
+    await prisma.cartItem.create({
+        data:
+            {
+                productItemId: 1,
+                cartId: 1,
+                quantity: 2,
+                ingredients: {
+                    connect: [{id: 1}, {id: 2}, {id: 3}, {id: 4}]
+                }
+            }
+    })
 }
 
 async function down() {
@@ -78,6 +123,9 @@ async function down() {
         'Product',
         'Ingredient',
         'Category',
+        'ProductItem',
+        'Cart',
+        'CartItem'
     ];
 
     for (const table of tables) {
