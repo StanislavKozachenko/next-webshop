@@ -10,7 +10,7 @@ import {useCategoryStore} from "@/store/category";
 interface Props {
     title: string;
     items: any[];
-    listClassName: string;
+    listClassName?: string;
     categoryId: number;
     className?: string;
 }
